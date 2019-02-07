@@ -212,7 +212,21 @@ func hydrateProperty(v reflect.Value, prop *properties.Property) error {
 		if !voldval.CanSet() {
 			return utils.NewError(hydrateProperty, "unable to set array value", v, nil)
 		} else {
-			voldval.Set(reflect.Append(voldval, vnew))
+
+			if voldval.Kind() == reflect.Ptr && v.Type().Elem().Kind() == reflect.Slice {
+				if voldval.IsNil() {
+					slc := reflect.MakeSlice(v.Type().Elem(), 0, 10)
+					x := reflect.New(v.Type().Elem())
+					x.Elem().Set(slc)
+
+					voldval.Set(x)
+				}
+
+				voldval.Elem().Set(reflect.Append(voldval.Elem(), vnew.Elem()))
+			} else {
+				voldval.Set(reflect.Append(voldval, vnew))
+			}
+
 		}
 	} else if vlit {
 		// for literals, set the dereferenced value

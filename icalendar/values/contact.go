@@ -40,9 +40,13 @@ func NewOrganizerContact(name, email string) *OrganizerContact {
 // validates the contact value for the iCalendar specification
 func (c *Contact) ValidateICalValue() error {
 	email := c.Entry.String()
-	if _, err := mail.ParseAddress(email); err != nil {
-		msg := fmt.Sprintf("unable to validate address %s", email)
-		return utils.NewError(c.ValidateICalValue, msg, c, err)
+	if c.Entry.Address != "" {
+		if _, err := mail.ParseAddress(email); err != nil {
+			msg := fmt.Sprintf("unable to validate address %s", email)
+			return utils.NewError(c.ValidateICalValue, msg, c, err)
+		} else {
+			return nil
+		}
 	} else {
 		return nil
 	}
